@@ -1,5 +1,5 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
-import { useColorScheme } from 'react-native';
+import { PlatformColor, useColorScheme } from 'react-native';
 
 import { Colors } from '@/constants/theme';
 
@@ -9,21 +9,25 @@ export default function AppTabs() {
 
   return (
     <NativeTabs
-      backgroundColor={colors.background}
-      indicatorColor={colors.backgroundElement}
-      labelStyle={{ selected: { color: colors.text } }}>
+      backgroundColor={"#f6effb"}
+      indicatorColor={"#ead3fb"}
+      iconColor={{ selected: PlatformColor("label") }}
+      labelStyle={{ selected: { color: PlatformColor("label") } }}
+    >
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/home.png')}
+          sf="house"
+          md="home"
           renderingMode="template"
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="explore">
-        <NativeTabs.Trigger.Label>Explore</NativeTabs.Trigger.Label>
+      <NativeTabs.Trigger name="carrinho">
+        <NativeTabs.Trigger.Label>Carrinho</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/explore.png')}
+          sf="cart"
+          md="shopping_cart"
           renderingMode="template"
         />
       </NativeTabs.Trigger>
