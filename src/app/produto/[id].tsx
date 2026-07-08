@@ -1,7 +1,7 @@
 import { Spacing } from '@/constants/theme';
 import { useCart } from '@/services/CartContext';
-import { Button, Host, Icon, Picker, Row } from '@expo/ui';
-import { buttonBorderShape, buttonStyle, controlSize, labelStyle } from '@expo/ui/swift-ui/modifiers';
+import { useFav } from '@/services/FavoriteContext';
+import { Host, Picker, Row } from '@expo/ui';
 import { BlurView } from 'expo-blur';
 import { GlassView } from 'expo-glass-effect';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,7 +9,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import * as React from "react";
 import { useEffect, useState } from 'react';
-import { Image, PlatformColor, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, PlatformColor, Pressable, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn, FadeOut, LinearTransition, useSharedValue } from 'react-native-reanimated';
 import Carousel, { ICarouselInstance, Pagination, } from "react-native-reanimated-carousel";
 
@@ -19,6 +19,11 @@ export default function Produto() {
 
     const { id } = useLocalSearchParams();
     const [produto, setProduto] = useState([]);
+    const { addToFav, isAlreadySaved, removeFromFav } = useFav();
+
+    console.log(produto);
+
+
 
     useEffect(() => {
         async function carregarProdutos() {
@@ -44,16 +49,16 @@ export default function Produto() {
     const [valueT, setValueT] = useState(tamanhos[0].value);
 
     const cores = [
-        { label: 'Azul', value: 'azul', cor: "#0000ff" },
-        { label: 'Vermelho', value: 'vermelho', cor: "#FF0000" },
-        { label: 'Verde', value: 'verde', cor: "#00FF00" },
+        { label: 'Azul', value: 'azul', hex: "#0000ff" },
+        { label: 'Vermelho', value: 'vermelho', hex: "#FF0000" },
+        { label: 'Verde', value: 'verde', hex: "#00FF00" },
     ];
 
     const [valueC, setValueC] = useState(cores[0].value);
 
     const getCorAtual = () => {
         const corAchada = cores.find((c) => c.value == valueC)
-        return corAchada.cor
+        return corAchada.hex
     }
 
     const [open, setOpen] = useState(true);
@@ -129,47 +134,51 @@ export default function Produto() {
                             />
                         )}
                     />
-                    <Host matchContents style={{ position: "absolute", zIndex: 1, top: 16, right: 12 }}>
-                        <Button
-                            modifiers={[buttonStyle('glass'),
-                            controlSize('extraLarge'),
-                            labelStyle('iconOnly'),
-                            buttonBorderShape('circle'),
-                            ]}
-                            onPress={() => alert('Pressed!')} >
-                            {/* label="Search"
-                                    systemImage="magnifyingglass"
-                                    */}
-                            <Icon
-                                name={Icon.select({
-                                    ios: 'heart',
-                                    android: require('@expo/material-symbols/favorite.xml'),
-                                })}
-                                size={16}
-                                color={PlatformColor("label")}
-                            />
-                        </Button>
-                    </Host>
 
-                    <Host matchContents style={{ position: "absolute", zIndex: 1, top: 15, left: 12 }}>
-                        <Button
-                            modifiers={[buttonStyle('glass'),
-                            controlSize('extraLarge'),
-                            labelStyle('iconOnly'),
-                            buttonBorderShape('circle'),
-                            ]}
-                            onPress={() => cher()} >
-                            <Icon
-                                name={Icon.select({
+                    <Pressable onPress={(e) => {
+                        e.stopPropagation()
+                    }} style={{ position: "absolute", top: 16, right: 12 }}>
+                        <TouchableOpacity onPress={() => {
+                            {
+                                isAlreadySaved(produto.id) ?
+                                    removeFromFav(produto.id) :
+                                    addToFav({
+                                        id: produto.id,
+                                        name: produto.title
+                                    })
+                            }
+                        }}>
+                            <View style={{ backgroundColor: PlatformColor("systemGray6"), padding: Spacing.three, borderRadius: 300 }}>
+                                <SymbolView name={isAlreadySaved(produto.id) ? {
+                                    ios: 'heart.fill',
+                                    android: 'favorite',
+                                } : {
+                                    ios: 'heart',
+                                    android: 'favorite',
+                                }}
+                                    tintColor={isAlreadySaved(produto.id) ? PlatformColor("systemRed") : PlatformColor("label")}
+                                    size={20}
+                                />
+                            </View>
+                        </TouchableOpacity>
+                    </Pressable>
+
+                    <Pressable onPress={(e) => {
+                        e.stopPropagation()
+                    }} style={{ position: "absolute", top: 16, left: 12 }}>
+                        <TouchableOpacity onPress={() => cher()}>
+                            <View style={{ backgroundColor: PlatformColor("systemGray6"), padding: Spacing.three, borderRadius: 300 }}>
+                                <SymbolView name={{
                                     ios: 'square.and.arrow.up',
-                                    android: require('@expo/material-symbols/share.xml'),
-                                })}
-                                size={16}
-                                color={PlatformColor("label")}
-                                style={{ backgroundColor: "transparent" }}
-                            />
-                        </Button>
-                    </Host>
+                                    android: 'share',
+                                }}
+                                    tintColor={PlatformColor("label")}
+                                    size={20}
+                                />
+                            </View>
+                        </TouchableOpacity>
+                    </Pressable>
+
                 </GlassView>
 
                 <View style={{ marginTop: 10 }}>

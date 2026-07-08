@@ -1,4 +1,5 @@
 import { CartProvider } from '@/services/CartContext';
+import { FavProvider } from '@/services/FavoriteContext';
 import { RethinkSans_400Regular, RethinkSans_600SemiBold, useFonts } from '@expo-google-fonts/rethink-sans';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -27,17 +28,25 @@ export default function RootLayout() {
     return (
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
             <CartProvider>
-                <Stack>
-                    {/* Oculta o cabeçalho das abas porque elas já têm layout próprio */}
-                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    {/* Configura o cabeçalho da página de produto */}
-                    <Stack.Screen name="produto/[id]" options={{
-                        title: 'Detalhes do Produto',
-                        headerBackTitle: "Voltar",
-                        headerTitleAlign: "center",
-                        headerTitleStyle: { fontFamily: "RethinkSans_400Regular" },
-                    }} />
-                </Stack>
+                <FavProvider>
+                    <Stack>
+                        {/* Oculta o cabeçalho das abas porque elas já têm layout próprio */}
+                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                        {/* Configura o cabeçalho da página de produto */}
+                        <Stack.Screen name="produto/[id]" options={{
+                            title: 'Detalhes do Produto',
+                            headerBackTitle: "Voltar",
+                            headerTitleAlign: "center",
+                            headerTitleStyle: { fontFamily: "RethinkSans_400Regular" },
+                        }} />
+                        <Stack.Screen name="favoritos/favoritos" options={{
+                            title: 'Favoritos',
+                            headerBackTitle: "Voltar",
+                            headerTitleAlign: "center",
+                            headerTitleStyle: { fontFamily: "RethinkSans_400Regular" },
+                        }} />
+                    </Stack>
+                </FavProvider>
             </CartProvider>
         </ThemeProvider>
     );

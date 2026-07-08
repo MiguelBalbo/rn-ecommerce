@@ -83,7 +83,7 @@ export default function HomeScreen() {
               labelStyle('iconOnly'),
               buttonBorderShape('circle'),
               ]}
-              onPress={() => alert('Pressed!')} >
+              onPress={() => router.push("/favoritos/favoritos")} >
               <Icon
                 name={Icon.select({
                   ios: 'heart',

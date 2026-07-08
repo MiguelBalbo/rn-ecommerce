@@ -1,14 +1,14 @@
 import { Spacing } from "@/constants/theme";
-import { Button, Host, Icon } from "@expo/ui";
-import { buttonBorderShape, buttonStyle, controlSize, tint } from '@expo/ui/swift-ui/modifiers';
+import { useFav } from "@/services/FavoriteContext";
 import { GlassView } from "expo-glass-effect";
-import { Image, PlatformColor, Text, View } from "react-native";
+import { SymbolView } from "expo-symbols";
+import { Image, PlatformColor, Pressable, Text, TouchableOpacity, View } from "react-native";
 
 type Produto = {
     produto: {
         index: number,
         item: {
-            id: number,
+            id: string,
             title: string,
             price: number,
             description: string,
@@ -21,7 +21,9 @@ type Produto = {
 
 
 export default function ProductCard({ produto, pressed }: Produto) {
-    //console.log(produto)
+
+    const { addToFav, isAlreadySaved, removeFromFav } = useFav();
+
     return (
         <View style={[produto.index === 0 && { marginLeft: Spacing.three }, { alignContent: "center", marginHorizontal: 5 }]}>
             <GlassView tintColor={PlatformColor("systemGray5")} style={{ width: 250, height: 250, alignItems: "center", justifyContent: "center", borderRadius: 32 }}>
@@ -29,18 +31,33 @@ export default function ProductCard({ produto, pressed }: Produto) {
                 <GlassView tintColor="#000000de" style={{ padding: 14, position: "absolute", borderRadius: 15, right: 10, bottom: 10 }}>
                     <Text style={{ color: "#f0f0f0", fontFamily: "RethinkSans_400Regular", fontSize: 14 }}>R${produto.item.price?.toFixed(2)}</Text>
                 </GlassView>
-                <Host matchContents style={{ position: "absolute", top: 10, left: 10 }}>
-                    <Button label="heart" modifiers={[buttonStyle('glass'), controlSize('large'), buttonBorderShape("circle"), tint("#000000de")]} onPress={() => alert('Pressed!')}>
-                        <Icon
-                            name={Icon.select({
+                <Pressable onPress={(e) => {
+                    e.stopPropagation()
+                }} style={{ position: "absolute", top: 10, left: 12 }}>
+                    <TouchableOpacity onPress={() => {
+                        {
+                            isAlreadySaved(produto.item.id) ?
+                                removeFromFav(produto.item.id) :
+                                addToFav({
+                                    id: produto.item.id,
+                                    name: produto.item.title
+                                })
+                        }
+                    }}>
+                        <View style={{ backgroundColor: PlatformColor("systemGray6"), padding: Spacing.two, borderRadius: 300 }}>
+                            <SymbolView name={isAlreadySaved(produto.item.id) ? {
+                                ios: 'heart.fill',
+                                android: 'favorite',
+                            } : {
                                 ios: 'heart',
-                                android: require('@expo/material-symbols/favorite.xml'),
-                            })}
-                            size={16}
-                            color={PlatformColor("label")}
-                        />
-                    </Button>
-                </Host>
+                                android: 'favorite',
+                            }}
+                                tintColor={isAlreadySaved(produto.item.id) ? PlatformColor("systemRed") : PlatformColor("label")}
+                                size={20}
+                            />
+                        </View>
+                    </TouchableOpacity>
+                </Pressable>
             </GlassView>
             <Text numberOfLines={2} style={{ width: 240, marginHorizontal: 5, fontSize: 16, marginTop: Spacing.two, fontFamily: "RethinkSans_600SemiBold", textAlign: "center", color: PlatformColor("label") }}>{produto.item.title}</Text>
             <Text numberOfLines={2} style={{ width: 230, marginHorizontal: 5, fontSize: 12, textAlign: "center", marginTop: Spacing.one, fontFamily: "RethinkSans_400Regular", color: PlatformColor("label") }}>{produto.item.description}</Text>
