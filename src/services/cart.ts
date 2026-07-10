@@ -23,5 +23,5 @@ export const cartStorage = {
 
     clearCart: async () => {
         await AsyncStorage.removeItem(CART_KEY);
-    }
+    },
 };

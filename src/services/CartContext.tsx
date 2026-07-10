@@ -1,17 +1,10 @@
+import { CartItem } from '@/types/itemCarrinhoType';
+import { Notificacao } from '@/types/notificacaoType';
 import * as Notifications from 'expo-notifications';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { cartStorage } from './cart';
+import { notificationStorage } from './notificationscheduler';
 
-export interface CartItem {
-    id: string;
-    name: string;
-    image?: string;
-    quantity: number;
-    properties: {
-        cor?: { label: string, value: string, hex: string },
-        tamanho?: string
-    }
-}
 
 interface CartContextData {
     cart: CartItem[];
@@ -26,32 +19,65 @@ const NOTIFICACAO_CARRINHO_ID = 'carrinho_abandonado';
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [cart, setCart] = useState<CartItem[]>([]);
 
+    //agenda notificações de carrinho abandonado
     useEffect(() => {
-        // Função para gerenciar o agendamento
         async function gerenciarNotificacaoCarrinho() {
-            // 1. Sempre cancela o agendamento anterior para resetar o "cronômetro"
-            await Notifications.cancelScheduledNotificationAsync(NOTIFICACAO_CARRINHO_ID);
+            try {
 
-            // 2. Se o carrinho tiver itens, agenda um novo para o futuro
-            if (cart.length > 0) {
-                await Notifications.scheduleNotificationAsync({
-                    id: NOTIFICACAO_CARRINHO_ID, // Mantém o mesmo ID para podermos cancelar depois
-                    content: {
-                        title: "Esqueceu alguma coisa?",
-                        body: `Seus itens ainda estão te esperando no carrinho. Garanta-os antes que acabem!`,
-                        sound: true,
-                        badge: 1,
-                    },
-                    trigger: {
-                        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-                        seconds: 2 * 60 * 60,
-                    },
-                });
+                let nots = await notificationStorage.getNotifications();
+
+                notificationStorage.apagaAntigas();
+
+                const ultimoIdNotificacao = async () => {
+
+                    if (nots) {
+                        const notCarrinho = nots.filter((notification: Notificacao) => notification.tipo == "cart")
+                        return notCarrinho && notCarrinho.length > 0 ? notCarrinho[notCarrinho.length - 1].id : "";
+                    }
+
+                    return ""
+                }
+
+                const idNotificacao: string = await ultimoIdNotificacao();
+                console.log("ID recuperado para cancelar:", idNotificacao);
+
+                //apaga agendamento
+                if (idNotificacao !== "") {
+                    await Notifications.cancelScheduledNotificationAsync(idNotificacao);
+                    await notificationStorage.removeNotification(idNotificacao);
+                }
+
+                // cria novo agendamento
+                if (cart.length > 0) {
+                    const novoIdNotificacao = await Notifications.scheduleNotificationAsync({
+                        content: {
+                            title: "Esqueceu alguma coisa?",
+                            body: `Seus itens ainda estão te esperando no carrinho. Garanta-os antes que acabem!`,
+                            sound: true,
+                            badge: 1,
+                        },
+                        trigger: {
+                            type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+                            seconds: 10,
+                        },
+                    });
+
+                    await notificationStorage.saveNotification({
+                        tipo: "cart",
+                        id: novoIdNotificacao,
+                        horarioDisparo: Date.now()
+                    });
+                }
+
+            } catch (err) {
+                console.log(err);
+                return [];
             }
         }
 
         gerenciarNotificacaoCarrinho();
-    }, [cart]); // Executa toda vez que o carrinho mudar
+    }, [cart]);
+
 
     // Carrega o carrinho do AsyncStorage assim que o app abre
     useEffect(() => {

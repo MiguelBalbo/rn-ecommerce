@@ -20,6 +20,7 @@ export default function carrinho() {
                     renderItem={(ic) => <CartCard cartItem={ic} key={ic.item.id} />}
                     keyExtractor={ic => ic.id}
                     style={{ flex: 1 }}
+                    contentContainerStyle={{ paddingBottom: 175 }}
                 />
             </View>
             <TouchableOpacity style={{ position: "absolute", bottom: 100, left: 0, right: 0, marginHorizontal: Spacing.three }}>

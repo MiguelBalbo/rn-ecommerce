@@ -2,8 +2,9 @@ import { Spacing } from "@/constants/theme";
 import { FavsItem, useFav } from "@/services/FavoriteContext";
 import { GlassView } from "expo-glass-effect";
 import { router } from "expo-router";
+import { SymbolView } from "expo-symbols";
 import { useEffect, useState } from "react";
-import { Alert, Image, PlatformColor, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, PlatformColor, Pressable, Text, TouchableOpacity, View } from "react-native";
 
 type ItemFav = {
     favItem: {
@@ -55,8 +56,24 @@ export default function CartCard(favItem: ItemFav) {
                     <View style={{ gap: 5, flex: 1 }}>
                         <Text style={{ fontFamily: "RethinkSans_600SemiBold", fontSize: 18, color: PlatformColor("label"), flexShrink: 1 }}>{favItem.favItem.item.name}</Text>
                         <Text style={{ fontFamily: "RethinkSans_400Regular", fontSize: 16, color: PlatformColor("label") }}>Preço: R$ {(precoProduto * 1).toFixed(2)}</Text>
-
                     </View>
+                    <Pressable onPress={(e) => {
+                        e.stopPropagation()
+                    }} style={{}}>
+                        <TouchableOpacity onPress={() => {
+                            alertRemocao()
+                        }}>
+                            <View style={{ backgroundColor: PlatformColor("systemGray6"), padding: Spacing.two, borderRadius: 300, marginLeft: 10 }}>
+                                <SymbolView name={{
+                                    ios: 'xmark',
+                                    android: 'close',
+                                }}
+                                    tintColor={PlatformColor("label")}
+                                    size={16}
+                                />
+                            </View>
+                        </TouchableOpacity>
+                    </Pressable>
                 </View>
             </GlassView>
 

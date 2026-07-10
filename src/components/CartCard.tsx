@@ -1,9 +1,9 @@
 import { Spacing } from "@/constants/theme";
-import { CartItem, useCart } from "@/services/CartContext";
-import { Button, Host, Icon } from '@expo/ui';
-import { buttonBorderShape, buttonStyle } from '@expo/ui/swift-ui/modifiers';
+import { useCart } from "@/services/CartContext";
+import { CartItem } from "@/types/itemCarrinhoType";
 import { GlassView } from "expo-glass-effect";
 import { router } from "expo-router";
+import { SymbolView } from "expo-symbols";
 import { useEffect, useState } from "react";
 import { Alert, Image, PlatformColor, Pressable, Text, TouchableOpacity, View } from "react-native";
 
@@ -58,47 +58,36 @@ export default function CartCard(cartItem: ItemCar) {
                         <Text style={{ fontFamily: "RethinkSans_600SemiBold", fontSize: 18, color: PlatformColor("label"), flexShrink: 1 }}>{cartItem.cartItem.item.name}</Text>
 
                         <Pressable onPress={(e) => e.stopPropagation()} style={{ borderColor: PlatformColor("secondaryLabel"), flexDirection: "row", alignItems: "center", padding: 5, borderWidth: 1, alignSelf: "flex-start", borderRadius: 20 }}>
-                            <Host matchContents style={{ marginRight: 3 }}>
-                                <Button
-                                    modifiers={[buttonStyle('glass'),
-                                    buttonBorderShape('circle'),
-                                    ]}
-                                    onPress={() => { }} >
-                                    <Icon
-                                        name={Icon.select({
-                                            ios: 'plus',
-                                            android: require('@expo/material-symbols/add.xml'),
-                                        })}
+
+                            <TouchableOpacity style={{ marginRight: 3 }} onPress={() => { }}>
+                                <View style={{ backgroundColor: PlatformColor("systemGray6"), padding: 7, borderRadius: 300, marginLeft: 3, marginRight: 3 }}>
+                                    <SymbolView name={{
+                                        ios: 'plus',
+                                        android: 'add',
+                                    }}
+                                        tintColor={PlatformColor("label")}
                                         size={12}
-                                        color={PlatformColor("label")}
-                                        style={{ backgroundColor: "transparent" }}
                                     />
-                                </Button>
-                            </Host>
+                                </View>
+                            </TouchableOpacity>
                             <Text style={{ fontFamily: "RethinkSans_400Regular", fontSize: 18, color: PlatformColor("label") }}>{cartItem.cartItem.item.quantity}</Text>
-                            <Host matchContents style={cartItem.cartItem.item.quantity > 1 ? { marginRight: -3 } : { marginLeft: 5 }}>
-                                <Button
-                                    modifiers={[buttonStyle('glass'),
-                                    buttonBorderShape('circle'),
-                                    ]}
-                                    onPress={() => {
-                                        cartItem.cartItem.item.quantity > 1 ?
-                                            removeFromCart(cartItem.cartItem.item.id) : alertRemocao()
-                                    }} >
-                                    <Icon
-                                        name={Icon.select(cartItem.cartItem.item.quantity > 1 ? {
-                                            ios: 'minus',
-                                            android: require('@expo/material-symbols/remove.xml'),
-                                        } : {
-                                            ios: 'trash',
-                                            android: require('@expo/material-symbols/delete.xml'),
-                                        })}
-                                        size={cartItem.cartItem.item.quantity > 1 ? 12 : 11}
-                                        color={cartItem.cartItem.item.quantity > 1 ? PlatformColor("label") : PlatformColor("systemRed")}
-                                        style={cartItem.cartItem.item.quantity > 1 ? { padding: 4 } : { padding: -1 }}
+                            <TouchableOpacity onPress={() => {
+                                cartItem.cartItem.item.quantity > 1 ?
+                                    removeFromCart(cartItem.cartItem.item.id) : alertRemocao()
+                            }}>
+                                <View style={{ backgroundColor: PlatformColor("systemGray6"), padding: 7, borderRadius: 300, marginLeft: 10 }}>
+                                    <SymbolView name={cartItem.cartItem.item.quantity > 1 ? {
+                                        ios: 'minus',
+                                        android: 'remove',
+                                    } : {
+                                        ios: 'trash',
+                                        android: 'delete',
+                                    }}
+                                        tintColor={cartItem.cartItem.item.quantity > 1 ? PlatformColor("label") : PlatformColor("systemRed")}
+                                        size={12}
                                     />
-                                </Button>
-                            </Host>
+                                </View>
+                            </TouchableOpacity>
                         </Pressable>
 
                         <View style={{ flexDirection: "row", gap: 5 }}>
