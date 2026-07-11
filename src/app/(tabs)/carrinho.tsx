@@ -1,14 +1,16 @@
 import CartCard from "@/components/CartCard";
-import { Spacing } from "@/constants/theme";
+import { Colors, Spacing } from "@/constants/theme";
 import { useCart } from "@/services/CartContext";
 import { GlassView } from "expo-glass-effect";
 import { SymbolView } from "expo-symbols";
-import { FlatList, PlatformColor, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Platform, PlatformColor, Text, TouchableOpacity, useColorScheme, View } from "react-native";
 
 export default function carrinho() {
 
     const { cart } = useCart();
 
+    const colorScheme = useColorScheme();
+    const isDarkMode = colorScheme === 'dark';
 
 
     return (
@@ -20,20 +22,20 @@ export default function carrinho() {
                     renderItem={(ic) => <CartCard cartItem={ic} key={ic.item.id} />}
                     keyExtractor={ic => ic.id}
                     style={{ flex: 1 }}
-                    contentContainerStyle={{ paddingBottom: 175 }}
+                    contentContainerStyle={{ paddingBottom: Platform.OS === "android" ? 87 : 175 }}
                 />
             </View>
-            <TouchableOpacity style={{ position: "absolute", bottom: 100, left: 0, right: 0, marginHorizontal: Spacing.three }}>
+            <TouchableOpacity style={{ position: "absolute", bottom: Platform.OS === "android" ? 10 : 100, left: 0, right: 0, marginHorizontal: Spacing.three }}>
                 <GlassView
                     tintColor={PlatformColor("label")}
-                    style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderRadius: 30, paddingHorizontal: Spacing.three, paddingVertical: Spacing.three }}
+                    style={[{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderRadius: 30, paddingHorizontal: Spacing.three, paddingVertical: Spacing.three }, Platform.OS === "android" && { backgroundColor: isDarkMode ? Colors.dark.text : Colors.light.text }]}
                 >
-                    <Text style={{ fontFamily: "RethinkSans_400Regular", fontSize: 20, color: PlatformColor("systemBackground") }}>Checkout</Text>
+                    <Text style={{ fontFamily: "RethinkSans_400Regular", fontSize: 20, color: isDarkMode ? Colors.dark.background : Colors.light.background }}>Checkout</Text>
                     <SymbolView name={{
                         ios: 'cart.fill',
                         android: 'shopping_cart_checkout',
                     }}
-                        tintColor={PlatformColor("systemBackground")}
+                        tintColor={isDarkMode ? Colors.dark.background : Colors.light.background}
                         size={24}
                     />
                 </GlassView>

@@ -1,11 +1,11 @@
-import { Spacing } from "@/constants/theme";
+import { Colors, Spacing } from "@/constants/theme";
 import { useCart } from "@/services/CartContext";
 import { CartItem } from "@/types/itemCarrinhoType";
 import { GlassView } from "expo-glass-effect";
 import { router } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useEffect, useState } from "react";
-import { Alert, Image, PlatformColor, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Platform, PlatformColor, Pressable, Text, TouchableOpacity, useColorScheme, View } from "react-native";
 
 type ItemCar = {
     cartItem: {
@@ -18,6 +18,9 @@ export default function CartCard(cartItem: ItemCar) {
 
     const [precoProduto, setPrecoProduto] = useState();
     const [urlProduto, setUrlProduto] = useState();
+
+    const colorScheme = useColorScheme();
+    const isDarkMode = colorScheme === 'dark';
 
     useEffect(() => {
         async function carregarProduto() {
@@ -51,16 +54,16 @@ export default function CartCard(cartItem: ItemCar) {
     return (
         <TouchableOpacity onPress={() => router.push({ pathname: "/produto/[id]", params: { id: cartItem.cartItem.item.id } })}>
 
-            <GlassView style={{ borderRadius: 24, marginVertical: 5, padding: Spacing.three }}>
+            <GlassView style={[{ borderRadius: 24, marginVertical: 5, padding: Spacing.three }, Platform.OS === "android" && { backgroundColor: isDarkMode ? Colors.dark.backgroundElement2 : Colors.light.backgroundElement2 }]}>
                 <View style={{ flexDirection: "row", width: '100%', alignItems: 'center' }}>
                     <Image source={{ uri: urlProduto }} style={{ width: 100, height: 100, resizeMode: "contain" }} />
                     <View style={{ gap: 5, flex: 1 }}>
                         <Text style={{ fontFamily: "RethinkSans_600SemiBold", fontSize: 18, color: PlatformColor("label"), flexShrink: 1 }}>{cartItem.cartItem.item.name}</Text>
 
-                        <Pressable onPress={(e) => e.stopPropagation()} style={{ borderColor: PlatformColor("secondaryLabel"), flexDirection: "row", alignItems: "center", padding: 5, borderWidth: 1, alignSelf: "flex-start", borderRadius: 20 }}>
+                        <Pressable onPress={(e) => e.stopPropagation()} style={{ borderColor: isDarkMode ? Colors.dark.textSecondary : Colors.light.textSecondary, flexDirection: "row", alignItems: "center", padding: 5, borderWidth: 1, alignSelf: "flex-start", borderRadius: 20 }}>
 
                             <TouchableOpacity style={{ marginRight: 3 }} onPress={() => { }}>
-                                <View style={{ backgroundColor: PlatformColor("systemGray6"), padding: 7, borderRadius: 300, marginLeft: 3, marginRight: 3 }}>
+                                <View style={{ backgroundColor: isDarkMode ? Colors.dark.backgroundElement : Colors.light.backgroundElement, padding: 7, borderRadius: 300, marginLeft: 3, marginRight: 3 }}>
                                     <SymbolView name={{
                                         ios: 'plus',
                                         android: 'add',
@@ -75,7 +78,7 @@ export default function CartCard(cartItem: ItemCar) {
                                 cartItem.cartItem.item.quantity > 1 ?
                                     removeFromCart(cartItem.cartItem.item.id) : alertRemocao()
                             }}>
-                                <View style={{ backgroundColor: PlatformColor("systemGray6"), padding: 7, borderRadius: 300, marginLeft: 10 }}>
+                                <View style={{ backgroundColor: isDarkMode ? Colors.dark.backgroundElement : Colors.light.backgroundElement, padding: 7, borderRadius: 300, marginLeft: 10 }}>
                                     <SymbolView name={cartItem.cartItem.item.quantity > 1 ? {
                                         ios: 'minus',
                                         android: 'remove',
@@ -83,7 +86,7 @@ export default function CartCard(cartItem: ItemCar) {
                                         ios: 'trash',
                                         android: 'delete',
                                     }}
-                                        tintColor={cartItem.cartItem.item.quantity > 1 ? PlatformColor("label") : PlatformColor("systemRed")}
+                                        tintColor={cartItem.cartItem.item.quantity > 1 ? PlatformColor("label") : isDarkMode ? Colors.dark.red : Colors.light.red}
                                         size={12}
                                     />
                                 </View>
@@ -91,13 +94,13 @@ export default function CartCard(cartItem: ItemCar) {
                         </Pressable>
 
                         <View style={{ flexDirection: "row", gap: 5 }}>
-                            <View style={{ alignSelf: "flex-start", backgroundColor: PlatformColor("secondarySystemFill"), flexDirection: "row", alignItems: "center", gap: 5, paddingVertical: Spacing.one, paddingHorizontal: Spacing.two, borderRadius: 20 }}>
+                            <View style={{ alignSelf: "flex-start", backgroundColor: isDarkMode ? Colors.dark.backgroundElement : Colors.light.backgroundElement, flexDirection: "row", alignItems: "center", gap: 5, paddingVertical: Spacing.one, paddingHorizontal: Spacing.two, borderRadius: 20 }}>
                                 <Text style={{ fontFamily: "RethinkSans_400Regular", fontSize: 14, color: PlatformColor("label") }}>Cor: </Text>
-                                <View style={{ width: 12, height: 12, backgroundColor: cartItem.cartItem.item.properties.cor?.cor, borderRadius: 100, borderColor: PlatformColor("label"), borderWidth: 1 }}></View>
+                                <View style={{ width: 12, height: 12, backgroundColor: cartItem.cartItem.item.properties.cor?.hex, borderRadius: 100, borderColor: isDarkMode ? Colors.dark.text : Colors.light.text, borderWidth: 1 }}></View>
                                 <Text style={{ fontFamily: "RethinkSans_400Regular", fontSize: 14, color: PlatformColor("label") }}>{cartItem.cartItem.item.properties.cor?.label}</Text>
 
                             </View>
-                            <View style={{ alignSelf: "flex-start", backgroundColor: PlatformColor("secondarySystemFill"), flexDirection: "row", alignItems: "center", gap: 5, paddingVertical: Spacing.one, paddingHorizontal: Spacing.two, borderRadius: 20 }}>
+                            <View style={{ alignSelf: "flex-start", backgroundColor: isDarkMode ? Colors.dark.backgroundElement : Colors.light.backgroundElement, flexDirection: "row", alignItems: "center", gap: 5, paddingVertical: Spacing.one, paddingHorizontal: Spacing.two, borderRadius: 20 }}>
                                 <Text style={{ fontFamily: "RethinkSans_400Regular", fontSize: 14, color: PlatformColor("label") }}>Tamanho: </Text>
                                 <Text style={{ fontFamily: "RethinkSans_400Regular", fontSize: 14, color: PlatformColor("label"), textTransform: "capitalize" }}>{cartItem.cartItem.item.properties.tamanho}</Text>
                             </View>

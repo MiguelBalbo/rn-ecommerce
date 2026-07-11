@@ -1,10 +1,10 @@
-import { Spacing } from "@/constants/theme";
+import { Colors, Spacing } from "@/constants/theme";
 import { FavsItem, useFav } from "@/services/FavoriteContext";
 import { GlassView } from "expo-glass-effect";
 import { router } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useEffect, useState } from "react";
-import { Alert, Image, PlatformColor, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Platform, PlatformColor, Pressable, Text, TouchableOpacity, useColorScheme, View } from "react-native";
 
 type ItemFav = {
     favItem: {
@@ -17,6 +17,9 @@ export default function CartCard(favItem: ItemFav) {
 
     const [precoProduto, setPrecoProduto] = useState();
     const [urlProduto, setUrlProduto] = useState();
+
+    const colorScheme = useColorScheme();
+    const isDarkMode = colorScheme === 'dark';
 
     useEffect(() => {
         async function carregarProduto() {
@@ -50,7 +53,7 @@ export default function CartCard(favItem: ItemFav) {
     return (
         <TouchableOpacity onPress={() => router.push({ pathname: "/produto/[id]", params: { id: favItem.favItem.item.id } })}>
 
-            <GlassView style={{ borderRadius: 24, marginVertical: 5, padding: Spacing.three }}>
+            <GlassView style={[{ borderRadius: 24, marginVertical: 5, padding: Spacing.three }, Platform.OS === 'android' && { backgroundColor: isDarkMode ? Colors.dark.backgroundElement : Colors.light.backgroundElement }]}>
                 <View style={{ flexDirection: "row", width: '100%', alignItems: 'center' }}>
                     <Image source={{ uri: urlProduto }} style={{ width: 100, height: 100, resizeMode: "contain" }} />
                     <View style={{ gap: 5, flex: 1 }}>

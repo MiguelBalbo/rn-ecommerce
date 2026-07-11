@@ -1,8 +1,9 @@
-import { Spacing } from "@/constants/theme";
+import { Colors, Spacing } from "@/constants/theme";
 import { useFav } from "@/services/FavoriteContext";
 import { GlassView } from "expo-glass-effect";
 import { SymbolView } from "expo-symbols";
-import { Image, PlatformColor, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { HeartIcon } from 'phosphor-react-native';
+import { Image, Platform, PlatformColor, Pressable, Text, TouchableOpacity, useColorScheme, View } from "react-native";
 
 type Produto = {
     produto: {
@@ -24,11 +25,16 @@ export default function ProductCard({ produto, pressed }: Produto) {
 
     const { addToFav, isAlreadySaved, removeFromFav } = useFav();
 
+    const colorScheme = useColorScheme();
+    const isDarkMode = colorScheme === 'dark';
+
+
+
     return (
         <View style={[produto.index === 0 && { marginLeft: Spacing.three }, { alignContent: "center", marginHorizontal: 5 }]}>
-            <View style={{ width: 250, height: 250, alignItems: "center", justifyContent: "center", borderRadius: 32, backgroundColor: PlatformColor("systemGray5") }}>
+            <View style={{ width: 250, height: 250, alignItems: "center", justifyContent: "center", borderRadius: 32, backgroundColor: isDarkMode ? Colors.dark.backgroundElement2 : Colors.light.backgroundElement2 }}>
                 <Image style={{ width: 200, height: 200, resizeMode: 'contain' }} source={{ uri: produto.item.image }} />
-                <GlassView tintColor="#000000de" style={{ padding: 14, position: "absolute", borderRadius: 15, right: 10, bottom: 10 }}>
+                <GlassView tintColor={"#000000de"} style={[{ padding: 14, position: "absolute", borderRadius: 15, right: 10, bottom: 10 }, Platform.OS === "android" && { backgroundColor: "#000000de" }]}>
                     <Text style={{ color: "#f0f0f0", fontFamily: "RethinkSans_400Regular", fontSize: 14 }}>R${produto.item.price?.toFixed(2)}</Text>
                 </GlassView>
                 <Pressable onPress={(e) => {
@@ -44,17 +50,17 @@ export default function ProductCard({ produto, pressed }: Produto) {
                                 })
                         }
                     }}>
-                        <View style={{ backgroundColor: PlatformColor("systemGray6"), padding: Spacing.two, borderRadius: 300 }}>
-                            <SymbolView name={isAlreadySaved(produto.item.id) ? {
-                                ios: 'heart.fill',
-                                android: 'favorite',
-                            } : {
-                                ios: 'heart',
-                                android: 'favorite',
-                            }}
-                                tintColor={isAlreadySaved(produto.item.id) ? PlatformColor("systemRed") : PlatformColor("label")}
-                                size={20}
-                            />
+                        <View style={{ backgroundColor: isDarkMode ? Colors.dark.backgroundElement : Colors.light.backgroundElement, padding: Spacing.two, borderRadius: 300 }}>
+                            {Platform.OS === "ios" ?
+                                <SymbolView name={isAlreadySaved(produto.item.id) ? {
+                                    ios: 'heart.fill',
+                                } : {
+                                    ios: 'heart',
+                                }}
+                                    tintColor={isAlreadySaved(produto.item.id) ? isDarkMode ? Colors.dark.red : Colors.light.red : PlatformColor("label")}
+                                    size={20}
+                                /> :
+                                <HeartIcon color={isAlreadySaved(produto.item.id) ? isDarkMode ? Colors.dark.red : Colors.light.red : isDarkMode ? Colors.dark.text : Colors.light.text} weight={isAlreadySaved(produto.item.id) ? "fill" : "regular"} size={20} />}
                         </View>
                     </TouchableOpacity>
                 </Pressable>

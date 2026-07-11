@@ -9,8 +9,8 @@ export default function AppTabs() {
 
   return (
     <NativeTabs
-      backgroundColor={"#f6effb"}
-      indicatorColor={"#ead3fb"}
+      backgroundColor={"#ebebebff"}
+      indicatorColor={"#bcbcbcff"}
       iconColor={{ selected: PlatformColor("label") }}
       labelStyle={{ selected: { color: PlatformColor("label") } }}
     >

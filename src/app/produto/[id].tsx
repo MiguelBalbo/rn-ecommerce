@@ -1,17 +1,20 @@
-import { Spacing } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
 import { useCart } from '@/services/CartContext';
 import { useFav } from '@/services/FavoriteContext';
 import { Host, Picker, Row } from '@expo/ui';
+import { Picker as Picker2 } from '@react-native-picker/picker';
 import { BlurView } from 'expo-blur';
 import { GlassView } from 'expo-glass-effect';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
+import { HeartIcon } from 'phosphor-react-native';
 import * as React from "react";
 import { useEffect, useState } from 'react';
-import { Image, PlatformColor, Pressable, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, Platform, PlatformColor, Pressable, ScrollView, Share, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from "react-native";
 import Animated, { FadeIn, FadeOut, LinearTransition, useSharedValue } from 'react-native-reanimated';
 import Carousel, { ICarouselInstance, Pagination, } from "react-native-reanimated-carousel";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 
@@ -21,7 +24,8 @@ export default function Produto() {
     const [produto, setProduto] = useState([]);
     const { addToFav, isAlreadySaved, removeFromFav } = useFav();
 
-    console.log(produto);
+    const colorScheme = useColorScheme();
+    const isDarkMode = colorScheme === 'dark';
 
 
 
@@ -90,14 +94,16 @@ export default function Produto() {
     const { addToCart } = useCart();
     const { cart } = useCart();
 
+    const insets = useSafeAreaInsets();
+
     return (
         <View style={{ flex: 1 }}>
 
-            <ScrollView style={{ paddingHorizontal: Spacing.three }} contentContainerStyle={{ paddingBottom: 80, paddingTop: 20 }}>
-                <GlassView
+            <ScrollView style={{ paddingHorizontal: Spacing.three }} contentContainerStyle={{ paddingBottom: Platform.OS === "android" ? 100 : 80, paddingTop: 20 }}>
+                <View
                     id="carousel-component"
                     dataSet={{ kind: "basic-layouts", name: "normal" }}
-                    style={{ justifyContent: "center", alignItems: "center", width: 350, alignSelf: 'center', borderRadius: 35, padding: 10, marginTop: 10, position: "relative" }}
+                    style={[{ justifyContent: "center", alignItems: "center", width: 350, alignSelf: 'center', borderRadius: 35, padding: 10, marginTop: 10, position: "relative", backgroundColor: isDarkMode ? Colors.dark.backgroundElement2 : Colors.light.backgroundElement2 }]}
                 >
                     <Carousel
                         testID={"normal-carousel-demo"}
@@ -148,17 +154,16 @@ export default function Produto() {
                                     })
                             }
                         }}>
-                            <View style={{ backgroundColor: PlatformColor("systemGray6"), padding: Spacing.three, borderRadius: 300 }}>
-                                <SymbolView name={isAlreadySaved(produto.id) ? {
+                            <View style={{ backgroundColor: isDarkMode ? Colors.dark.backgroundElement : Colors.light.backgroundElement, padding: Spacing.three, borderRadius: 100 }}>
+                                {Platform.OS === 'ios' ? <SymbolView name={isAlreadySaved(produto.id) ? {
                                     ios: 'heart.fill',
-                                    android: 'favorite',
                                 } : {
                                     ios: 'heart',
-                                    android: 'favorite',
                                 }}
                                     tintColor={isAlreadySaved(produto.id) ? PlatformColor("systemRed") : PlatformColor("label")}
                                     size={20}
-                                />
+                                /> :
+                                    <HeartIcon color={isAlreadySaved(produto.id) ? isDarkMode ? Colors.dark.red : Colors.light.red : isDarkMode ? Colors.dark.text : Colors.light.text} weight={isAlreadySaved(produto.id) ? "fill" : "bold"} size={20} />}
                             </View>
                         </TouchableOpacity>
                     </Pressable>
@@ -167,7 +172,7 @@ export default function Produto() {
                         e.stopPropagation()
                     }} style={{ position: "absolute", top: 16, left: 12 }}>
                         <TouchableOpacity onPress={() => cher()}>
-                            <View style={{ backgroundColor: PlatformColor("systemGray6"), padding: Spacing.three, borderRadius: 300 }}>
+                            <View style={{ backgroundColor: isDarkMode ? Colors.dark.backgroundElement : Colors.light.backgroundElement, padding: Spacing.three, borderRadius: 100 }}>
                                 <SymbolView name={{
                                     ios: 'square.and.arrow.up',
                                     android: 'share',
@@ -179,7 +184,7 @@ export default function Produto() {
                         </TouchableOpacity>
                     </Pressable>
 
-                </GlassView>
+                </View>
 
                 <View style={{ marginTop: 10 }}>
                     <Pagination.Basic<{ color: string }>
@@ -211,10 +216,10 @@ export default function Produto() {
                         marginHorizontal: 10,
                     }}>{produto.title}</Text>
 
-                    <View style={{ marginVertical: 10, flexDirection: "row", justifyContent: "space-between", gap: 20 }}>
-                        <GlassView style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", paddingVertical: Spacing.two, paddingHorizontal: Spacing.three, marginTop: Spacing.two, borderRadius: 100, alignItems: "center" }}>
+                    <View style={[{ marginVertical: 10, flexDirection: Platform.OS === "android" ? "column" : "row", justifyContent: "space-between", gap: Platform.OS === "android" ? 5 : 20, flex: 1 }]}>
+                        <GlassView style={[{ flex: 1, flexDirection: "row", justifyContent: "space-between", paddingVertical: Spacing.two, paddingHorizontal: Spacing.three, marginTop: Spacing.two, alignItems: "center", borderRadius: 100 }, Platform.OS === "android" && { backgroundColor: isDarkMode ? Colors.dark.backgroundElement : Colors.light.backgroundElement, gap: 10, borderRadius: 20 }]}>
                             <Text style={{ fontSize: 16, fontFamily: "RethinkSans_400Regular", color: PlatformColor("label") }} >Tamanho:</Text>
-                            <Host matchContents style={{ width: 200, marginRight: -10 }}>
+                            {Platform.OS == "ios" ? <Host matchContents style={{ width: 200, marginRight: -10 }}>
                                 <Row alignment="center" spacing={12}>
                                     <Picker selectedValue={valueT} onValueChange={setValueT}>
                                         {tamanhos.map(t => (
@@ -222,15 +227,20 @@ export default function Produto() {
                                         ))}
                                     </Picker>
                                 </Row>
-                            </Host>
+                            </Host> :
+                                <Picker2 selectedValue={valueT} onValueChange={setValueT} style={{ flex: 1, backgroundColor: isDarkMode ? Colors.dark.backgroundElement2 : Colors.light.backgroundElement2 }} mode='dropdown'>
+                                    {tamanhos.map(t => (
+                                        <Picker2.Item key={t.value} label={t.label} value={t.value} style={{ fontFamily: "RethinkSans_400Regular" }} />
+                                    ))}
+                                </Picker2>}
                         </GlassView>
 
-                        <GlassView style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", paddingVertical: Spacing.two, paddingHorizontal: Spacing.three, marginTop: Spacing.two, borderRadius: 100, alignItems: "center" }}>
+                        <GlassView style={[{ flex: 1, flexDirection: "row", justifyContent: "space-between", paddingVertical: Spacing.two, paddingHorizontal: Spacing.three, marginTop: Spacing.two, borderRadius: 100, alignItems: "center" }, Platform.OS === "android" && { backgroundColor: isDarkMode ? Colors.dark.backgroundElement : Colors.light.backgroundElement, gap: 10, borderRadius: 20 }]}>
                             <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-                                <View style={{ width: 16, height: 16, backgroundColor: getCorAtual(), borderRadius: 100, borderColor: PlatformColor("label"), borderWidth: 1 }}></View>
+                                <View style={{ width: 16, height: 16, backgroundColor: getCorAtual(), borderRadius: 100, borderColor: isDarkMode ? Colors.dark.text : Colors.light.text, borderWidth: 1 }}></View>
                                 <Text style={{ fontSize: 16, fontFamily: "RethinkSans_400Regular", color: PlatformColor("label") }} >Cor:</Text>
                             </View>
-                            <Host matchContents style={{ marginHorizontal: -10 }}>
+                            {Platform.OS == "ios" ? <Host matchContents style={{ marginHorizontal: -10 }}>
                                 <Row alignment="center" spacing={12}>
                                     <Picker selectedValue={valueC} onValueChange={setValueC}>
                                         {cores.map(c => (
@@ -238,7 +248,11 @@ export default function Produto() {
                                         ))}
                                     </Picker>
                                 </Row>
-                            </Host>
+                            </Host> : <Picker2 selectedValue={valueC} onValueChange={setValueC} style={{ flex: 1, backgroundColor: isDarkMode ? Colors.dark.backgroundElement2 : Colors.light.backgroundElement2 }} mode='dropdown'>
+                                {cores.map(c => (
+                                    <Picker2.Item key={c.value} label={c.label} value={c.value} />
+                                ))}
+                            </Picker2>}
                         </GlassView>
                     </View>
 
@@ -249,7 +263,7 @@ export default function Produto() {
                                 style={{ borderRadius: 20, overflow: 'hidden' }}
                             >
 
-                                <GlassView style={{ padding: Spacing.three }}>
+                                <GlassView style={[{ padding: Spacing.three }, Platform.OS === "android" && { backgroundColor: isDarkMode ? Colors.dark.backgroundElement : Colors.light.backgroundElement }]}>
                                     <TouchableOpacity onPress={() => { setOpen(!open) }}>
                                         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
                                             <Text style={{
@@ -288,15 +302,15 @@ export default function Produto() {
             </ScrollView>
 
 
-            <BlurView intensity={5} style={{ position: 'absolute', bottom: 0, left: 0, right: 0, paddingTop: 17 }}>
+            <BlurView intensity={5} style={{ position: 'absolute', bottom: Platform.OS === "android" ? insets.bottom : 0, left: 0, right: 0, paddingTop: 17 }}>
                 <LinearGradient
                     colors={['transparent', "#222222"]}
                     start={{ x: 0, y: 0.5 }}
                     end={{ x: 0, y: 1 }}
                     style={StyleSheet.absoluteFill}
                 />
-                <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", paddingHorizontal: 10, paddingBottom: 30, gap: 12 }}>
-                    <GlassView style={{ paddingVertical: Spacing.three, paddingHorizontal: 16, borderRadius: 100, alignSelf: "center" }}>
+                <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", paddingHorizontal: 10, paddingBottom: Platform.OS === "android" ? 20 : 30, gap: 12 }}>
+                    <GlassView style={[{ paddingVertical: Spacing.three, paddingHorizontal: 16, borderRadius: 100, alignSelf: "center" }, Platform.OS === "android" && { backgroundColor: isDarkMode ? "#19191aef" : "#ededf0ef" }]}>
                         <Text style={{ fontFamily: "RethinkSans_600SemiBold", fontSize: 18, color: PlatformColor("label"), textAlign: "center", minWidth: 85 }}>R${produto.price?.toFixed(2)}</Text>
                     </GlassView>
                     <TouchableOpacity onPress={() => {
@@ -315,16 +329,16 @@ export default function Produto() {
                     }}>
                         <GlassView
                             tintColor={PlatformColor("label")}
-                            style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderRadius: 30, paddingHorizontal: Spacing.three, paddingVertical: Spacing.three }}
+                            style={[{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderRadius: 30, paddingHorizontal: Spacing.three, paddingVertical: Spacing.three }, Platform.OS === "android" && { backgroundColor: isDarkMode ? Colors.dark.text : Colors.light.text }]}
                         >
                             <SymbolView name={{
                                 ios: 'cart',
                                 android: 'shopping_cart',
                             }}
-                                tintColor={PlatformColor("systemBackground")}
+                                tintColor={isDarkMode ? Colors.dark.background : Colors.light.background}
                                 size={16}
                             />
-                            <Text style={{ fontFamily: "RethinkSans_400Regular", fontSize: 16, color: PlatformColor("systemBackground") }}>Adicionar ao carrinho</Text>
+                            <Text style={{ fontFamily: "RethinkSans_400Regular", fontSize: 16, color: isDarkMode ? Colors.dark.background : Colors.light.background }}>Adicionar ao carrinho</Text>
                         </GlassView>
                     </TouchableOpacity>
                 </View>

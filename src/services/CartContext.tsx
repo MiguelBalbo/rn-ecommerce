@@ -1,7 +1,7 @@
 import { CartItem } from '@/types/itemCarrinhoType';
 import { Notificacao } from '@/types/notificacaoType';
-import * as Notifications from 'expo-notifications';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { cartStorage } from './cart';
 import { notificationStorage } from './notificationscheduler';
 
@@ -21,61 +21,63 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     //agenda notificações de carrinho abandonado
     useEffect(() => {
-        async function gerenciarNotificacaoCarrinho() {
-            try {
+        if (Platform.OS === 'ios') {
+            async function gerenciarNotificacaoCarrinho() {
+                try {
 
-                let nots = await notificationStorage.getNotifications();
+                    let nots = await notificationStorage.getNotifications();
 
-                notificationStorage.apagaAntigas();
+                    notificationStorage.apagaAntigas();
 
-                const ultimoIdNotificacao = async () => {
+                    const ultimoIdNotificacao = async () => {
 
-                    if (nots) {
-                        const notCarrinho = nots.filter((notification: Notificacao) => notification.tipo == "cart")
-                        return notCarrinho && notCarrinho.length > 0 ? notCarrinho[notCarrinho.length - 1].id : "";
+                        if (nots) {
+                            const notCarrinho = nots.filter((notification: Notificacao) => notification.tipo == "cart")
+                            return notCarrinho && notCarrinho.length > 0 ? notCarrinho[notCarrinho.length - 1].id : "";
+                        }
+
+                        return ""
                     }
 
-                    return ""
+                    const idNotificacao: string = await ultimoIdNotificacao();
+                    console.log("ID recuperado para cancelar:", idNotificacao);
+
+                    //apaga agendamento
+                    if (idNotificacao !== "") {
+                        await Notifications.cancelScheduledNotificationAsync(idNotificacao);
+                        await notificationStorage.removeNotification(idNotificacao);
+                    }
+
+                    // cria novo agendamento
+                    if (cart.length > 0) {
+                        const novoIdNotificacao = await Notifications.scheduleNotificationAsync({
+                            content: {
+                                title: "Esqueceu alguma coisa?",
+                                body: `Seus itens ainda estão te esperando no carrinho. Garanta-os antes que acabem!`,
+                                sound: true,
+                                badge: 1,
+                            },
+                            trigger: {
+                                type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+                                seconds: 10,
+                            },
+                        });
+
+                        await notificationStorage.saveNotification({
+                            tipo: "cart",
+                            id: novoIdNotificacao,
+                            horarioDisparo: Date.now()
+                        });
+                    }
+
+                } catch (err) {
+                    console.log(err);
+                    return [];
                 }
-
-                const idNotificacao: string = await ultimoIdNotificacao();
-                console.log("ID recuperado para cancelar:", idNotificacao);
-
-                //apaga agendamento
-                if (idNotificacao !== "") {
-                    await Notifications.cancelScheduledNotificationAsync(idNotificacao);
-                    await notificationStorage.removeNotification(idNotificacao);
-                }
-
-                // cria novo agendamento
-                if (cart.length > 0) {
-                    const novoIdNotificacao = await Notifications.scheduleNotificationAsync({
-                        content: {
-                            title: "Esqueceu alguma coisa?",
-                            body: `Seus itens ainda estão te esperando no carrinho. Garanta-os antes que acabem!`,
-                            sound: true,
-                            badge: 1,
-                        },
-                        trigger: {
-                            type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-                            seconds: 10,
-                        },
-                    });
-
-                    await notificationStorage.saveNotification({
-                        tipo: "cart",
-                        id: novoIdNotificacao,
-                        horarioDisparo: Date.now()
-                    });
-                }
-
-            } catch (err) {
-                console.log(err);
-                return [];
             }
-        }
 
-        gerenciarNotificacaoCarrinho();
+            gerenciarNotificacaoCarrinho();
+        }
     }, [cart]);
 
 
